@@ -1,5 +1,11 @@
 
+body {
+	background-color: #000;
+	color: #FFF;
+}
+
 .thumbnail {
 	height: 50px;
 	width: 50px;
+	border-radius: 50%;
 }
