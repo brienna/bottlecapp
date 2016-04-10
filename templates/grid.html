@@ -9,10 +9,6 @@
 </head>
 
 <body>
-	{% for thumbnail in thumbnails %}
-	<div><img src="{{ thumbnail.path }}" class="thumbnail"></div>
-	{% endfor %}
-
 	<p>The database: {{ thumbnails }}</p>
 
 	<p>The database serialized and converted to JSON: {{ caps }}</p>
