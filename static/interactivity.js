@@ -1,38 +1,32 @@
 var diameter = 600;
 
-var svg = d3.select('body').append('svg')
+// create an SVG container to hold the visualization
+var svg = d3.select('body')
+	.append('svg')
 	.attr({width: diameter, height: diameter})
 	.style({"margin-left": "auto", 
 		"margin-right": "auto", 
 		"display": "block"});
 
-var bubbles = d3.layout.pack()
+var cluster = d3.layout.pack()
 	.size([diameter, diameter])
-	.padding(3)  // padding between adjacent bubbles
+	.padding(3)
 	.value(function(d) {return 1;})
+	.nodes({children: caps})  // caps variable was passed from app.py/grid.html
+	// filter out the outer bubble
+  	.filter(function(d) { return !d.children; })
 
-function processData(caps) {
-	var data = [];
+// select all bubbles, binding each to a cluster node
+var bubbles = svg.selectAll('circle')
+	.data(cluster);
 
-	for (i = 0; i < caps.length; i++) {
-		node = {date: caps[i].date, path: caps[i].path}
-		data.push(node);
-	}
-
-   return {children: data};
-}
-
-var nodes = bubbles.nodes(processData(caps))
-   // filter out the outer bubble
-   .filter(function(d) { return !d.children; });
-
-var vis = svg.selectAll('circle').data(nodes);
-
-vis.enter().append('circle')
-   .attr('transform', function(d) { return 'translate('
-      + d.x + ',' + d.y + ')'; })
-   .attr('r', function(d) { return d.r; })
-   .attr('fill', 'pink');
+// add bubble per cluster node
+bubbles.enter()
+	.append('circle')
+   	.attr('transform', function(d) { 
+   		return 'translate(' + d.x + ',' + d.y + ')'; })
+   	.attr('r', function(d) { return d.r; })
+   	.attr('fill', 'pink');
 
 
 
