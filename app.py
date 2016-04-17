@@ -1,10 +1,26 @@
 from flask import Flask, render_template, Markup
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields
+from flask_wtf import Form
+from wtforms import StringField
+from wtforms.validators import DataRequired
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+app.config['SECRET_KEY'] = 'important to keep unknown in production' # for form
 db = SQLAlchemy(app)  # creates db instance and binds it to the app
+
+
+class Login(Form):
+    """A class definition for the login form object.
+
+    Attributes: 
+        username (object)
+        password (object)
+    """
+    username = StringField('username:', validators=[DataRequired()])
+    password = StringField('password:', validators=[DataRequired()])
 
 
 class Cap(db.Model):
@@ -19,7 +35,6 @@ class Cap(db.Model):
 
 	def __repr__(self):
 		return '<Cap {0}, {1}>'.format(self.date, self.path)
-
 
 class CapSchema(Schema):
 	'''Use marshmallow to enable serialization of Cap query'''
@@ -43,7 +58,12 @@ def addCaps():
 				db.session.commit()
 
 
-@app.route('/')
+@app.route('/', methods=('GET', 'POST'))
+def login():
+	form = Login()
+	return render_template('login.html', form=form)
+
+@app.route('/gallery')
 def grid():
 	addCaps()
 
@@ -52,6 +72,7 @@ def grid():
 	caps = Markup(thumbnails_json.data)  # safer than {{ caps|tojson }} at keeping format as json while passing from jinja to js
 
 	return render_template('grid.html', thumbnails=thumbnails, caps=caps)
+
 
 if __name__ == '__main__':
 	db.create_all()
