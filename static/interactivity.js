@@ -1,33 +1,37 @@
-var diameter = 600;
+var width = 960,
+    height = 500
 
-// create an SVG container to hold the visualization
 var svg = d3.select('body')
-	.append('svg')
-	.attr({width: diameter, height: diameter})
-	.style({"margin-left": "auto", 
-		"margin-right": "auto", 
-		"display": "block"});
+  .append('svg')
+  .attr({width: width, height: height})
+  .style({"margin-left": "auto", 
+    "margin-right": "auto",
+    "display": "block"});
 
-var cluster = d3.layout.pack()
-	.size([diameter, diameter])
-	.padding(3)
-	.value(function(d) {return 1;})
-	.nodes({children: caps})  // caps variable was passed from app.py/grid.html
-	// filter out the outer bubble
-  	.filter(function(d) { return !d.children; })
+var force = d3.layout.force()
+    .gravity(0.5)
+    .distance(100)
+    .charge(-100)
+    .size([width, height])
+  	.nodes(caps)
+  	.start();
 
-// select all bubbles, binding each to a cluster node
-var bubbles = svg.selectAll('circle')
-	.data(cluster);
+var node = svg.selectAll(".node")
+  	.data(caps)
+	.enter().append("g")
+  	.attr("class", "node")
+  	.call(force.drag);
 
-// add bubble per cluster node
-bubbles.enter()
-	.append('circle')
-   	.attr('transform', function(d) { 
-   		return 'translate(' + d.x + ',' + d.y + ')'; })
-   	.attr('r', function(d) { return d.r; })
-   	.attr('fill', 'pink');
+node.append("image")
+  .attr("xlink:href", function(d) { return d.path; })
+  .attr("x", -8)
+  .attr("y", -8)
+  .attr("width", 15)
+  .attr("height", 15);
 
+force.on("tick", function(e) {
+	node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+});
 
 
 
