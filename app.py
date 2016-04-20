@@ -1,14 +1,18 @@
-from flask import Flask, render_template, Markup
+from flask import Flask, render_template, Markup, redirect, url_for, request, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields
 from flask_wtf import Form
 from wtforms import StringField
 from wtforms.validators import DataRequired
+import os
+from werkzeug import secure_filename
 
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SECRET_KEY'] = 'important to keep unknown in production' # for form
+app.config['UPLOAD_FOLDER'] = 'static/caps'
+app.config['ALLOWED_EXTENSIONS'] = set(['png'])
 db = SQLAlchemy(app)  # creates db instance and binds it to the app
 
 
@@ -44,34 +48,49 @@ class CapSchema(Schema):
 schema = CapSchema(many=True)
 
 
+def allowed_ext(filename):
+	"""For a given file, return whether or not it's an allowed type."""
+	return filename.rsplit('.')[1] in app.config['ALLOWED_EXTENSIONS']
+
 def addCaps():
-	"""Add cap from folder if filepath does not exist in database"""
-	import os
+	"""Add cap filepath to database if its filepath is not already in database"""
 	caps_dir = 'static/caps/'
 	for file in os.listdir(caps_dir):  
 		path = caps_dir + os.path.relpath(file)  # note: use relpath to later accommodate user folders
 		date = os.path.getctime(path)
 		ext = os.path.splitext(file)[1]
 		if ext == '.jpg' or ext == '.jpeg' or ext == '.png':  
-			if (db.session.query(Cap.path).filter_by(path=path).scalar() is None):
+			if db.session.query(Cap.path).filter_by(path=path).scalar() is None:
 				db.session.add(Cap(date, path))
 				db.session.commit()
 
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+	return render_template('upload.html')
+
+@app.route('/uploaded', methods=('GET', 'POST'))
+def uploaded():
+	if request.method == 'POST':
+		cap = request.files['file']
+		if allowed_ext(cap.filename):
+			cap_secure = secure_filename(cap.filename)
+			cap.save(os.path.join(app.config['UPLOAD_FOLDER'], cap_secure))
+			return redirect(url_for('index'))
 
 @app.route('/', methods=('GET', 'POST'))
 def login():
 	form = Login()
 	return render_template('login.html', form=form)
 
-@app.route('/gallery')
-def grid():
+@app.route('/gallery', methods=('GET', 'POST'))
+def index():
 	addCaps()
-
 	thumbnails = Cap.query.order_by('id DESC').all()
 	thumbnails_json = schema.dumps(thumbnails)
 	caps = Markup(thumbnails_json.data)  # safer than {{ caps|tojson }} at keeping format as json while passing from jinja to js
 
-	return render_template('grid.html', thumbnails=thumbnails, caps=caps)
+	return render_template('grid.html', caps=caps)
 
 
 if __name__ == '__main__':

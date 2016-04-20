@@ -3,13 +3,14 @@
 
 <head>
 	<link type="text/css" rel="stylesheet" href="static/style.css">
-	<script>
-	var caps = {{ caps }};
-	</script>
 </head>
 
 <body>
+	<a href="{{ url_for('upload') }}">++++++</a>
 
+	<script>
+	var caps = {{ caps }};
+	</script>
 	<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 	<script src="static/interactivity.js" charset="utf-8"></script>
 </body>
