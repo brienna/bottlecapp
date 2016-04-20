@@ -40,57 +40,58 @@ class Cap(db.Model):
 	def __repr__(self):
 		return '<Cap {0}, {1}>'.format(self.date, self.path)
 
+	def allowed_ext(filename):
+		"""For a given file, return whether or not it's an allowed type."""
+		return filename.rsplit('.')[1] in app.config['ALLOWED_EXTENSIONS']
+
+	def add():
+		"""Add cap filepath to database if its filepath is not already in database"""
+		caps_dir = 'static/caps/'
+		for file in os.listdir(caps_dir):  
+			path = caps_dir + os.path.relpath(file)  # note: use relpath to later accommodate user folders
+			date = os.path.getctime(path)
+			ext = os.path.splitext(file)[1]
+			if ext == '.jpg' or ext == '.jpeg' or ext == '.png':  
+				if db.session.query(Cap.path).filter_by(path=path).scalar() is None:
+					db.session.add(Cap(date, path))
+					db.session.commit()
+
+
 class CapSchema(Schema):
 	'''Use marshmallow to enable serialization of Cap query'''
 	date = fields.Int()
 	path = fields.Str()
 
-schema = CapSchema(many=True)
-
-
-def allowed_ext(filename):
-	"""For a given file, return whether or not it's an allowed type."""
-	return filename.rsplit('.')[1] in app.config['ALLOWED_EXTENSIONS']
-
-def addCaps():
-	"""Add cap filepath to database if its filepath is not already in database"""
-	caps_dir = 'static/caps/'
-	for file in os.listdir(caps_dir):  
-		path = caps_dir + os.path.relpath(file)  # note: use relpath to later accommodate user folders
-		date = os.path.getctime(path)
-		ext = os.path.splitext(file)[1]
-		if ext == '.jpg' or ext == '.jpeg' or ext == '.png':  
-			if db.session.query(Cap.path).filter_by(path=path).scalar() is None:
-				db.session.add(Cap(date, path))
-				db.session.commit()
-
-
-@app.route('/upload', methods=['GET', 'POST'])
-def upload():
-	return render_template('upload.html')
-
-@app.route('/uploaded', methods=('GET', 'POST'))
-def uploaded():
-	if request.method == 'POST':
-		cap = request.files['file']
-		if allowed_ext(cap.filename):
-			cap_secure = secure_filename(cap.filename)
-			cap.save(os.path.join(app.config['UPLOAD_FOLDER'], cap_secure))
-			return redirect(url_for('index'))
 
 @app.route('/', methods=('GET', 'POST'))
 def login():
 	form = Login()
 	return render_template('login.html', form=form)
 
+
 @app.route('/gallery', methods=('GET', 'POST'))
 def index():
-	addCaps()
+	Cap.add() # if not already in database
 	thumbnails = Cap.query.order_by('id DESC').all()
+	schema = CapSchema(many=True)
 	thumbnails_json = schema.dumps(thumbnails)
 	caps = Markup(thumbnails_json.data)  # safer than {{ caps|tojson }} at keeping format as json while passing from jinja to js
-
 	return render_template('grid.html', caps=caps)
+
+
+@app.route('/upload')
+def upload():
+	return render_template('upload.html')
+
+
+@app.route('/uploaded', methods=('GET', 'POST'))
+def uploaded():
+	if request.method == 'POST':
+		cap = request.files['file']
+		if Cap.allowed_ext(cap.filename):
+			cap_secure = secure_filename(cap.filename)
+			cap.save(os.path.join(app.config['UPLOAD_FOLDER'], cap_secure))
+			return redirect(url_for('index'))
 
 
 if __name__ == '__main__':
