@@ -1,19 +1,15 @@
-<!DOCTYPE html>
-<html>
+{% extends 'grid.html' %}
 
-<head>
-	<link type="text/css" rel="stylesheet" href="static/style.css">
-</head>
+{% block content %}
+<a href="{{ url_for('index') }}">RETURN TO GALLERY</a>
 
-<body>
-	<a href="{{ url_for('index') }}">RETURN TO GALLERY</a>
-	
-	<form action="{{ url_for('uploaded') }}" method=post enctype=multipart/form-data>
-		<label for=file id="fileContainer">Add cap
-		<input type=file name=file></label>
-		<input type=submit value=Upload>
-	</form>
+<form action="{{ url_for('uploaded') }}" method=post enctype=multipart/form-data>
+	<label for=file id="fileContainer">Add cap
+	<input type=file name=file></label>
+	<input type=submit value=Upload>
+</form>
+{% endblock content %}
 
-</body>
-</html>
+{% block script %}
+{% endblock script %}
 
