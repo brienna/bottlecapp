@@ -1,5 +1,18 @@
 {% extends 'grid.html' %}
 
+{% block head %}
+{{ super() }}
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <p class=flashes>
+    {% for message in messages %}
+      {{ message }}
+    {% endfor %}
+    </p>
+  {% endif %}
+{% endwith %}
+{% endblock head %}
+
 {% block content %}
 <a href="{{ url_for('index') }}">RETURN TO GALLERY</a>
 

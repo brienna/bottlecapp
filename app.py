@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Markup, redirect, url_for, request, send_from_directory
+from flask import Flask, render_template, Markup, flash, redirect, url_for, request, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields
 from flask_wtf import Form
@@ -88,10 +88,13 @@ def upload():
 def uploaded():
 	if request.method == 'POST':
 		cap = request.files['file']
-		if Cap.allowed_ext(cap.filename):
+		if cap and Cap.allowed_ext(cap.filename):
 			cap_secure = secure_filename(cap.filename)
 			cap.save(os.path.join(app.config['UPLOAD_FOLDER'], cap_secure))
 			return redirect(url_for('index'))
+		else:
+			flash('Incorrect file type. Please use png.')
+			return redirect(url_for('upload'))
 
 
 if __name__ == '__main__':
