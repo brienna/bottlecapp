@@ -2,15 +2,7 @@
 
 {% block head %}
 {{ super() }}
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <p class=flashes>
-    {% for message in messages %}
-      {{ message }}
-    {% endfor %}
-    </p>
-  {% endif %}
-{% endwith %}
+{% include 'helpers/flash.html' %}
 {% endblock head %}
 
 {% block content %}
