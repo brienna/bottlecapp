@@ -6,7 +6,7 @@ from wtforms import StringField
 from wtforms.validators import DataRequired
 import os
 from werkzeug import secure_filename
-
+import flask.ext.login as flask_login
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
@@ -14,9 +14,74 @@ app.config['SECRET_KEY'] = 'important to keep unknown in production' # for form
 app.config['UPLOAD_FOLDER'] = 'static/caps'
 app.config['ALLOWED_EXTENSIONS'] = set(['png'])
 db = SQLAlchemy(app)  # creates db instance and binds it to the app
+# set up the login manager by instantiating it and telling it about our Flask app
+login_manager = flask_login.LoginManager()
+login_manager.init_app(app)
+
+class User(db.Model):
+    __tablename__ = 'user'
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String)
+    password = db.Column(db.String)
+    authenticated = db.Column(db.Boolean, default=False)
+
+    def __init__(self, username, password):
+    	self.username = username
+    	self.password = password
+
+    def __repr__(self):
+    	return '<User {0}, {1}>'.format(self.username, self.password)
+
+    def is_active(self):
+        """True, as all users are active."""
+        return True
+
+    def get_id(self):
+        """Return the username to satisfy Flask-Login's requirements."""
+        return self.username
+
+    def is_authenticated(self):
+        """Return True if the user is authenticated."""
+        return self.authenticated
+
+    def is_anonymous(self):
+        """False, as anonymous users aren't supported."""
+        return False
+
+@login_manager.user_loader
+def user_loader(user_id):
+    return User.query.get(user_id)
+
+@app.route("/", methods=["GET", "POST"])
+def login():
+    """For GET requests, display the login form. For POSTS, login the current user
+    by processing the form."""
+    users = User.query.all()
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user:
+            if user.password == form.password.data:
+            	print('user exists')
+            	user.authenticated = True
+            	db.session.add(user)
+            	db.session.commit()
+            	flask_login.login_user(user, remember=True)
+            	return redirect(url_for("index"))
+            else:
+            	print('incorrect password')
+        else:
+        	print('new user')
+        	username = form.username.data
+        	password = form.password.data
+        	db.session.add(User(username, password))
+        	db.session.commit()
+        	return render_template("login.html", form=form, users=users)
+    return render_template("login.html", form=form)
 
 
-class Login(Form):
+class LoginForm(Form):
     """A class definition for the login form object.
 
     Attributes: 
@@ -57,16 +122,14 @@ class Cap(db.Model):
 					db.session.commit()
 
 
+
 class CapSchema(Schema):
 	'''Use marshmallow to enable serialization of Cap query'''
 	date = fields.Int()
 	path = fields.Str()
 
 
-@app.route('/', methods=('GET', 'POST'))
-def login():
-	form = Login()
-	return render_template('login.html', form=form)
+
 
 
 @app.route('/gallery', methods=('GET', 'POST'))
