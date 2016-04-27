@@ -6,7 +6,7 @@
 {% endblock head %}
 
 {% block content %}
-<a href="{{ url_for('index') }}">RETURN TO GALLERY</a>
+<a href="{{ url_for('gallery') }}">RETURN TO GALLERY</a>
 
 <form action="{{ url_for('uploaded') }}" method=post enctype=multipart/form-data>
 	<label for=file id="fileContainer">Add cap

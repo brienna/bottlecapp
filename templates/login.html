@@ -6,7 +6,8 @@
 </head>
 
 <body>
-	<form method="POST" action="/">
+	{% include 'helpers/flash.html' %}
+	<form method="POST" action="">
 		{% from "helpers/render_field.html" import render_field %}
 
 		<!--for csrf protection-->
@@ -15,11 +16,15 @@
 	    {{ render_field(form.username) }}
 	    {{ render_field(form.password) }}
 
-	    <input type="submit" value="Go">
+	    <input type="submit" value='{{ button }}'>
 	</form>
 
+	<br>
+	<a href="{{ url_for('signup') }}">SIGN UP</a>
+	<br><br>
+
 	{{ users }}
-	{% include 'helpers/flash.html' %}
+	
 </body>
 
 </html>

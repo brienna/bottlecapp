@@ -68,18 +68,33 @@ def login():
             	db.session.add(user)
             	db.session.commit()
             	flask_login.login_user(user, remember=True)
-            	return redirect(url_for("index"))
+            	return redirect(url_for("gallery"))
             else:
             	flash('incorrect password')
         else:
         	print('new user')
-        	username = form.username.data
-        	password = form.password.data
-        	db.session.add(User(username, password))
-        	db.session.commit()
-        	return render_template("login.html", form=form, users=users)
-    return render_template("login.html", form=form)
+        	flash('New user')
+    else:
+    	flash('Please log in.')
+    button = 'Log in'
+    return render_template("login.html", form=form, users=users, button=button)
 
+@app.route('/signup', methods=["GET", "POST"])
+def signup():
+	form = LoginForm()
+	users = User.query.all()
+	button = 'Sign up'
+	if form.validate_on_submit():
+		user = User.query.filter_by(username=form.username.data).first()
+		if user is None:
+			username = form.username.data
+			password = form.password.data
+			db.session.add(User(username, password))
+			db.session.commit()
+			return redirect(url_for('login'))
+		else:
+			flash('Existing user. Please choose a different name or log in')
+	return render_template('login.html', form=form, users=users, button=button)
 
 class LoginForm(Form):
     """A class definition for the login form object.
@@ -133,7 +148,7 @@ class CapSchema(Schema):
 
 
 @app.route('/gallery', methods=('GET', 'POST'))
-def index():
+def gallery():
 	Cap.add() # if not already in database
 	thumbnails = Cap.query.order_by('id DESC').all()
 	schema = CapSchema(many=True)
@@ -154,7 +169,7 @@ def uploaded():
 		if cap and Cap.allowed_ext(cap.filename):
 			cap_secure = secure_filename(cap.filename)
 			cap.save(os.path.join(app.config['UPLOAD_FOLDER'], cap_secure))
-			return redirect(url_for('index'))
+			return redirect(url_for('gallery'))
 		else:
 			flash('Incorrect file type. Please use png.')
 			return redirect(url_for('upload'))
