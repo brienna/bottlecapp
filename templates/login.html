@@ -5,13 +5,20 @@
 	<link type="text/css" rel="stylesheet" href="static/style.css">
 </head>
 
-<body>	
+<body>
 	<form method="POST" action="/">
+		{% from "helpers/render_field.html" import render_field %}
+
+		<!--for csrf protection-->
 	    {{ form.hidden_tag() }}
-	    {{ form.username.label }} {{ form.username(size=20) }}
-	    {{ form.password.label }} {{ form.password(size=20) }}
+
+	    {{ render_field(form.username) }}
+	    {{ render_field(form.password) }}
+
 	    <input type="submit" value="Go">
 	</form>
+
+	{{ users }}
 </body>
 
 </html>
