@@ -18,6 +18,7 @@ db = SQLAlchemy(app)  # creates db instance and binds it to the app
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 
+
 class User(db.Model):
     __tablename__ = 'user'
 
@@ -49,9 +50,11 @@ class User(db.Model):
         """False, as anonymous users aren't supported."""
         return False
 
+
 @login_manager.user_loader
 def user_loader(user_id):
     return User.query.get(user_id)
+
 
 @app.route("/", methods=["GET", "POST"])
 def login():
@@ -79,6 +82,7 @@ def login():
     button = 'Log in'
     return render_template("login.html", form=form, users=users, button=button)
 
+
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
 	form = LoginForm()
@@ -87,14 +91,20 @@ def signup():
 	if form.validate_on_submit():
 		user = User.query.filter_by(username=form.username.data).first()
 		if user is None:
+			# create new user
 			username = form.username.data
 			password = form.password.data
 			db.session.add(User(username, password))
 			db.session.commit()
+			# create new user folder
+			newpath = 'static/caps/' + username
+			if not os.path.exists(newpath):
+				os.makedirs(newpath)
 			return redirect(url_for('login'))
 		else:
 			flash('Existing user. Please choose a different name or log in')
 	return render_template('login.html', form=form, users=users, button=button)
+
 
 class LoginForm(Form):
     """A class definition for the login form object.
@@ -137,14 +147,10 @@ class Cap(db.Model):
 					db.session.commit()
 
 
-
 class CapSchema(Schema):
 	'''Use marshmallow to enable serialization of Cap query'''
 	date = fields.Int()
 	path = fields.Str()
-
-
-
 
 
 @app.route('/gallery', methods=('GET', 'POST'))
