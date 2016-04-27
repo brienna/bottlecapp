@@ -70,7 +70,7 @@ def login():
             	flask_login.login_user(user, remember=True)
             	return redirect(url_for("index"))
             else:
-            	print('incorrect password')
+            	flash('incorrect password')
         else:
         	print('new user')
         	username = form.username.data
