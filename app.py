@@ -140,8 +140,10 @@ class Cap(db.Model):
 
 	def add():
 		"""Add cap filepath to database if its filepath is not already in database"""
-		caps_dir = app.config['UPLOAD_FOLDER']
+		username = flask_login.current_user.get_username()
+		caps_dir = app.config['UPLOAD_FOLDER'] + username + '/'
 		for file in os.listdir(caps_dir):
+			print('file:', file)
 			path = caps_dir + os.path.relpath(file)  # note: use relpath to later accommodate user folders
 			date = os.path.getctime(path)
 			ext = os.path.splitext(file)[1]
