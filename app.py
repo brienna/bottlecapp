@@ -182,6 +182,7 @@ class CapSchema(Schema):
 
 
 @app.route('/gallery', methods=('GET', 'POST'))
+@flask_login.login_required
 def gallery():
 	Cap.add() # if not already in database
 	current_user = User.query.get(flask_login.current_user.get_id())
@@ -194,11 +195,13 @@ def gallery():
 
 
 @app.route('/upload')
+@flask_login.login_required
 def upload():
 	return render_template('upload.html')
 
 
 @app.route('/uploaded', methods=('GET', 'POST'))
+@flask_login.login_required
 def uploaded():
 	username = flask_login.current_user.get_username()
 	if request.method == 'POST':
