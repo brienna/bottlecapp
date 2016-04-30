@@ -87,6 +87,18 @@ def login():
     return render_template("login.html", form=form, users=users, button=button)
 
 
+@app.route("/logout", methods=["GET"])
+@flask_login.login_required
+def logout():
+    """Logout the current user."""
+    user = flask_login.current_user
+    user.authenticated = False
+    db.session.add(user)
+    db.session.commit()
+    flask_login.logout_user()
+    return redirect(url_for('login'))
+
+
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
 	form = LoginForm()
