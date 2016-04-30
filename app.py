@@ -184,10 +184,11 @@ class CapSchema(Schema):
 @app.route('/gallery', methods=('GET', 'POST'))
 def gallery():
 	Cap.add() # if not already in database
-	thumbnails = Cap.query.order_by('id DESC').all()
+	current_user = User.query.get(flask_login.current_user.get_id())
+	thumbnails = current_user.caps.all()
 	schema = CapSchema(many=True)
 	thumbnails_json = schema.dumps(thumbnails)
-	caps = Markup(thumbnails_json.data)  # safer than {{ caps|tojson }} at keeping format as json while passing from jinja to js
+	caps = Markup(thumbnails_json.data) # safer than {{ caps|tojson }} at keeping format as json while passing from jinja to js
 	users = User.query.all()
 	return render_template('grid.html', caps=caps, users=users)
 
