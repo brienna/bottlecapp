@@ -2,7 +2,7 @@ from flask import Flask, render_template, Markup, flash, redirect, url_for, requ
 from flask_sqlalchemy import SQLAlchemy
 from marshmallow import Schema, fields
 from flask_wtf import Form
-from wtforms import StringField
+from wtforms import StringField, PasswordField
 from wtforms.validators import DataRequired
 import os
 from werkzeug import secure_filename
@@ -139,7 +139,7 @@ class LoginForm(Form):
         password (object)
     '''
     username = StringField('username:', validators=[DataRequired()])
-    password = StringField('password:', validators=[DataRequired()])
+    password = PasswordField('password:', validators=[DataRequired()])
 
 
 class Cap(db.Model):
