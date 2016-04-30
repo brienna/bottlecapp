@@ -7,6 +7,7 @@ from wtforms.validators import DataRequired
 import os
 from werkzeug import secure_filename
 import flask.ext.login as flask_login
+import bcrypt
 
 # Initialize the Flask application and set configurations
 bottlecapp = Flask(__name__)
@@ -74,16 +75,17 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user:
-            if user.password == form.password.data:
-            	print('user exists')
-            	user.authenticated = True
-            	db.session.add(user)
-            	db.session.commit()
-            	flask_login.login_user(user, remember=True)
-            	return redirect(url_for('gallery'))
-            else:
-            	# Incorrect password, flash message
-            	flash('incorrect password')
+        	pw_bytes = form.password.data.encode('utf-8')
+        	if bcrypt.hashpw(pw_bytes, user.password) == user.password:
+        		print('user exists')
+        		user.authenticated = True
+        		db.session.add(user)
+        		db.session.commit()
+        		flask_login.login_user(user, remember=True)
+        		return redirect(url_for('gallery'))
+        	else:
+	        	# Incorrect password, flash message
+	        	flash('incorrect password')
         else:
         	# New user, flash message
         	flash('New user, please sign up')
@@ -113,9 +115,10 @@ def signup():
 	if form.validate_on_submit():
 		user = User.query.filter_by(username=form.username.data).first()
 		if user is None:
-			# create new user
+			# create new user, hashing password with a randomly-generated salt
 			username = form.username.data
-			password = form.password.data
+			pw_bytes = form.password.data.encode('utf-8')
+			password = bcrypt.hashpw(pw_bytes, bcrypt.gensalt())
 			db.session.add(User(username, password))
 			db.session.commit()
 			# create new user folder
