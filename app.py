@@ -205,15 +205,22 @@ def upload():
 def uploaded():
 	'''If uploaded cap file's extension is allowed, save to user folder.'''
 	if request.method == 'POST':
-		cap = request.files['file']
-		if cap and Cap.allowed_ext(cap.filename):
-			cap_secure = secure_filename(cap.filename)
-			username = flask_login.current_user.username
-			cap.save(os.path.join(bottlecapp.config['UPLOAD_FOLDER'] + username, cap_secure))
-			return redirect(url_for('gallery'))
-		else:
-			flash('Incorrect file type. Please use png.')
-			return redirect(url_for('upload'))
+		# Get the uploaded files as a list
+		uploaded_files = request.files.getlist('uploads')
+		filenames = []
+		for file in uploaded_files:
+			# Check if the file's extension is allowed
+			if file and Cap.allowed_ext(file.filename):
+				# Make the filename safe, remove unsupported chars
+				filename = secure_filename(file.filename)
+				# Save the file to the user folder
+				file.save(os.path.join(bottlecapp.config['UPLOAD_FOLDER'] + flask_login.current_user.username, filename))
+				# Save the filename into a list to be used later
+				filenames.append(filename)
+			else:
+				flash('Incorrect file type. Please upload only pngs.')
+				return redirect(url_for('upload'))
+		return redirect(url_for('gallery'))
 
 
 if __name__ == '__main__':
