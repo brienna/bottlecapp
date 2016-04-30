@@ -27,6 +27,9 @@ class User(db.Model):
     password = db.Column(db.String)
     authenticated = db.Column(db.Boolean, default=False)
 
+    # define one to many relationship with child table
+    caps = db.relationship('Cap', backref='user', lazy='dynamic')
+
     def __init__(self, username, password):
     	self.username = username
     	self.password = password
@@ -138,13 +141,17 @@ class Cap(db.Model):
 	id = db.Column(db.Integer, primary_key=True)  # primary key
 	date = db.Column(db.Integer)		  
 	path = db.Column(db.String(80))
+
+	# define foreign key on child table
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 	
-	def __init__(self, date, path):
+	def __init__(self, date, path, user_id):
 		self.date = date
 		self.path = path
+		self.user_id = user_id
 
 	def __repr__(self):
-		return '<Cap {0}, {1}>'.format(self.date, self.path)
+		return '<Cap {0}, {1}, {2}>'.format(self.date, self.path, self.user_id)
 
 	def allowed_ext(filename):
 		"""For a given file, return whether or not it's an allowed type."""
@@ -153,15 +160,17 @@ class Cap(db.Model):
 	def add():
 		"""Add cap filepath to database if its filepath is not already in database"""
 		username = flask_login.current_user.get_username()
+		user_id = flask_login.current_user.get_id()
 		caps_dir = app.config['UPLOAD_FOLDER'] + username + '/'
 		for file in os.listdir(caps_dir):
 			print('file:', file)
 			path = caps_dir + os.path.relpath(file)  # note: use relpath to later accommodate user folders
 			date = os.path.getctime(path)
 			ext = os.path.splitext(file)[1]
-			if ext == '.jpg' or ext == '.jpeg' or ext == '.png':  
+			if ext == '.jpg' or ext == '.jpeg' or ext == '.png':
+				print('yes')
 				if db.session.query(Cap.path).filter_by(path=path).scalar() is None:
-					db.session.add(Cap(date, path))
+					db.session.add(Cap(date, path, user_id))
 					db.session.commit()
 
 
@@ -169,6 +178,7 @@ class CapSchema(Schema):
 	'''Use marshmallow to enable serialization of Cap query'''
 	date = fields.Int()
 	path = fields.Str()
+	user_id = fields.Int()
 
 
 @app.route('/gallery', methods=('GET', 'POST'))
@@ -178,7 +188,8 @@ def gallery():
 	schema = CapSchema(many=True)
 	thumbnails_json = schema.dumps(thumbnails)
 	caps = Markup(thumbnails_json.data)  # safer than {{ caps|tojson }} at keeping format as json while passing from jinja to js
-	return render_template('grid.html', caps=caps)
+	users = User.query.all()
+	return render_template('grid.html', caps=caps, users=users)
 
 
 @app.route('/upload')

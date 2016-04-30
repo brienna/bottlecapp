@@ -12,6 +12,14 @@
 	{% block content %}
 	<a href="{{ url_for('upload') }}">++++++</a>
 	<a href="{{url_for('logout')}}">Log out</a>
+
+	current user: {{ current_user }}
+	<br><br>
+	caps: {{ caps }}
+	<br><br>
+	{% for user in users %}
+		{{ user }}: {{ user.caps.all() }}
+	{% endfor %}
 	{% endblock content %}
 
 	{% block script %}
