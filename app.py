@@ -25,8 +25,7 @@ login_manager.init_app(bottlecapp)
 
 
 class User(db.Model):
-	'''A class definition for a user object.
-	'''
+	'''A class definition for a user object.'''
 	id = db.Column(db.Integer, primary_key=True)
 	# User authentication information
 	username = db.Column(db.String)
@@ -41,10 +40,11 @@ class User(db.Model):
 		self.password = password
 
 	def __repr__(self):
+		'''Return string representation to use in debugging.'''
 		return '<User {0}, {1}>'.format(self.username, self.password)
 
 	def is_active(self):
-		'''True, as all users are active.'''
+		'''Return True, as all users are active.'''
 		return True
 
 	def get_id(self):
@@ -75,9 +75,9 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user:
+        	# encode password input in unicode
         	pw_bytes = form.password.data.encode('utf-8')
         	if bcrypt.hashpw(pw_bytes, user.password) == user.password:
-        		print('user exists')
         		user.authenticated = True
         		db.session.add(user)
         		db.session.commit()
@@ -89,10 +89,7 @@ def login():
         else:
         	# New user, flash message
         	flash('New user, please sign up')
-    else:
-    	flash('Please log in.')
-    button = 'Log in'
-    return render_template('login.html', form=form, users=users, button=button)
+    return render_template('login.html', form=form, users=users, button='sign in')
 
 
 @bottlecapp.route('/logout', methods=['GET'])
@@ -109,9 +106,9 @@ def logout():
 
 @bottlecapp.route('/signup', methods=['GET', 'POST'])
 def signup():
+	'''Sign the user up.'''
 	form = LoginForm()
 	users = User.query.all()
-	button = 'Sign up'
 	if form.validate_on_submit():
 		user = User.query.filter_by(username=form.username.data).first()
 		if user is None:
@@ -128,7 +125,7 @@ def signup():
 			return redirect(url_for('login'))
 		else:
 			flash('Existing user. Please choose a different name or log in')
-	return render_template('login.html', form=form, users=users, button=button)
+	return render_template('login.html', form=form, users=users, button='sign up')
 
 
 class LoginForm(Form):
@@ -143,6 +140,7 @@ class LoginForm(Form):
 
 
 class Cap(db.Model):
+	'''A class definition of a cap object.'''
 	# create db table columns
 	id = db.Column(db.Integer, primary_key=True)  # primary key
 	date = db.Column(db.Integer)		  
@@ -157,6 +155,7 @@ class Cap(db.Model):
 		self.user_id = user_id
 
 	def __repr__(self):
+		'''Return string representation to use in debugging.'''
 		return '<Cap {0}, {1}, {2}>'.format(self.date, self.path, self.user_id)
 
 	def allowed_ext(filename):
@@ -188,6 +187,7 @@ class CapSchema(Schema):
 @bottlecapp.route('/gallery', methods=('GET', 'POST'))
 @flask_login.login_required
 def gallery():
+	# Add cap to database if it has not already been added
 	Cap.add()
 	current_user = User.query.get(flask_login.current_user.get_id())
 	thumbnails = current_user.caps.all()
@@ -215,7 +215,7 @@ def uploaded():
 			# Check if the file's extension is allowed
 			if file and Cap.allowed_ext(file.filename):
 				# Make the filename safe, remove unsupported chars
-				filename = secure_filename(file.filename)
+				filename = werkzeug.secure_filename(file.filename)
 				# Save the file to the user folder
 				file.save(os.path.join(bottlecapp.config['UPLOAD_FOLDER'] + flask_login.current_user.username, filename))
 				# Save the filename into a list to be used later

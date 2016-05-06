@@ -9,8 +9,8 @@
 <a href='{{ url_for("gallery") }}'>RETURN TO GALLERY</a>
 
 <form action='{{ url_for("uploaded") }}' method='post' enctype='multipart/form-data'>
-	<label for='uploads'>Add caps
-	<input type='file' name='uploads' multiple></label>
+	<label for='uploads'>Add caps</label>
+	<input type='file' name='uploads' multiple>
 	<input type='submit' value='Upload'>
 </form>
 {% endblock content %}

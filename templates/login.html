@@ -2,12 +2,13 @@
 <html>
 
 <head>
-	<link type="text/css" rel="stylesheet" href="static/style.css">
+	<link type='text/css' rel='stylesheet' href='static/style.css'>
 </head>
 
 <body>
 	{% include 'helpers/flash.html' %}
-	<form method="POST" action="">
+	<div id='wrapper'>
+	<form method='POST' action=''>
 		{% from "helpers/render_field.html" import render_field %}
 
 		<!--for csrf protection-->
@@ -16,14 +17,12 @@
 	    {{ render_field(form.username) }}
 	    {{ render_field(form.password) }}
 
-	    <input type="submit" value='{{ button }}'>
+	    <div><input type='submit' value='{{ button }}'>
+	    <a href='{{ url_for("signup") }}' id='signup'>SIGN UP</a></div>
 	</form>
+	</div>
 
-	<br>
-	<a href="{{ url_for('signup') }}">SIGN UP</a>
-	<br><br>
-
-	{{ users }}
+	<p>{{ users }}</p>
 	
 </body>
 
