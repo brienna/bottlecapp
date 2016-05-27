@@ -20,6 +20,9 @@
 	{% for user in users %}
 		{{ user }}: {{ user.caps.all() }}
 	{% endfor %}
+
+	<br>
+	<canvas></canvas>
 	{% endblock content %}
 
 	{% block script %}
