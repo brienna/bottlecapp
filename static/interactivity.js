@@ -1,16 +1,20 @@
 
-var canvas = document.querySelector("canvas");
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-// Initialize context to access drawing interface
-var context = canvas.getContext("2d");
-
 // Gather data (passed from Jinja template)
 var data = caps;
 
-// Load and draw caps on the canvas
-loadCaps();
+// Set variables
+var width = window.innerWidth;
+var height = window.innerHeight;
+
+// Select the canvas and configure it
+var canvas = d3.select("canvas")
+  .attr("width", width)
+  .attr("height", height)
+  // Load and draw caps on the canvas
+  .call(loadCaps)
+
+// Get the canvas context to access drawing interface
+var context = canvas.node().getContext("2d");
 
 /** Load caps onto the page, then call drawCaps to draw */
 function loadCaps() {
@@ -34,14 +38,15 @@ function loadCaps() {
   }
 }
 
-/** Draw loaded caps on the canvas */
+/** Draw loaded caps onto the canvas */
 function drawCaps(caps) {
   for (var cap in caps) {
-    x = Math.random() * 100;
-    y = Math.random() * 100;
+    x = Math.random() * 200;
+    y = Math.random() * 200;
     context.drawImage(caps[cap], x, y, 50, 50);
   }
 }
+
 
 /*
 var width = 960,
@@ -81,9 +86,3 @@ force.on("tick", function(e) {
 */
 
 
-
-
-
-
- 
- 
