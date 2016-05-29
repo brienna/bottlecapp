@@ -5,23 +5,44 @@ var data = caps;
 // Set variables
 var width = window.innerWidth;
 var height = window.innerHeight;
+var preloaded = false;  // caps have not been preloaded yet
+var caps = {};  // where preloaded caps will be stored
 
-// Select the canvas and configure it
+// Select and configure the canvas element
 var canvas = d3.select("canvas")
   .attr("width", width)
   .attr("height", height)
-  // Load and draw caps on the canvas
-  .call(loadCaps)
+  // Preload cap images for later use
+  .call(preloadCaps)
+  .node();
 
 // Get the canvas context to access drawing interface
-var context = canvas.node().getContext("2d");
+var context = canvas.getContext("2d");
 
-/** Load caps onto the page, then call drawCaps to draw */
-function loadCaps() {
-  var caps = {};  // dict needed to later store info about each cap
+// Create and configure the force layout
+var force = d3.layout.force()
+  .size([width, height])
+  .nodes(caps)
+  .charge(1)
+  .start();
+
+force.on('tick', function() {
+  if (preloaded) {
+    // Clear the canvas
+    context.clearRect(0, 0, width, height);
+
+    for (var cap in caps) {
+      x = Math.random() * 200;
+      y = Math.random() * 200;
+      context.drawImage(caps[cap], x, y, 50, 50);
+
+    }
+  }
+});
+
+function preloadCaps() {
   var loadedCaps = 0;
   var numCaps = data.length;
-
   for (var i = 0; i < data.length; i++) {
     // Create a new img element
     caps[i] = new Image();
@@ -29,60 +50,13 @@ function loadCaps() {
     caps[i].addEventListener("load", function() {
       loadedCaps++;
       if (loadedCaps >= numCaps) {
-        // Finish loading
-        drawCaps(caps);
+        // Finish preloading
+        preloaded = true;
+        console.log('Caps have been preloaded.');
       }
     });
     // Set source url of image
     caps[i].src = data[i].path;
   }
 }
-
-/** Draw loaded caps onto the canvas */
-function drawCaps(caps) {
-  for (var cap in caps) {
-    x = Math.random() * 200;
-    y = Math.random() * 200;
-    context.drawImage(caps[cap], x, y, 50, 50);
-  }
-}
-
-
-/*
-var width = 960,
-    height = 500
-
-var svg = d3.select('body')
-  .append('svg')
-  .attr({width: width, height: height})
-  .style({"margin-left": "auto", 
-    "margin-right": "auto",
-    "display": "block"});
-
-var force = d3.layout.force()
-    .gravity(0.5)
-    .distance(100)
-    .charge(-100)
-    .size([width, height])
-    .nodes(caps)
-    .start();
-
-var node = svg.selectAll(".node")
-    .data(caps)
-    .enter().append("g")
-    .attr("class", "node")
-    .call(force.drag);
-
-node.append("image")
-  .attr("xlink:href", function(d) { return d.path; })
-  .attr("x", -8)
-  .attr("y", -8)
-  .attr("width", 15)
-  .attr("height", 15);
-
-force.on("tick", function(e) {
-    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-});
-*/
-
 
