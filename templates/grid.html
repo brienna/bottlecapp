@@ -5,6 +5,7 @@
 {% block head %}
 	<link type="text/css" rel="stylesheet" href="static/style.css">
 {% endblock head %}
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 
 
@@ -13,13 +14,13 @@
 	<a href="{{ url_for('upload') }}">++++++</a>
 	<a href="{{url_for('logout')}}">Log out</a>
 
-	current user: {{ current_user }}
+	current user: {{ current_user.username }}
 	<br><br>
-	caps: {{ caps }}
+	<!--caps: {{ caps }}-->
 	<br><br>
-	{% for user in users %}
+	<!--{% for user in users %}
 		{{ user }}: {{ user.caps.all() }}
-	{% endfor %}
+	{% endfor %}-->
 
 	<br>
 	<canvas></canvas>
