@@ -10,11 +10,15 @@
 
 <form action='{{ url_for("uploaded") }}' method='post' enctype='multipart/form-data'>
 	<label for='uploads'>Add caps</label>
-	<input type='file' name='uploads' multiple>
+	<input type='file' id='uploads' name='uploads' multiple>
 	<input type='submit' value='Upload'>
 </form>
+
+<br>
+<canvas></canvas>
 {% endblock content %}
 
 {% block script %}
+<script type="text/javascript" src="static/upload.js"></script>
 {% endblock script %}
 

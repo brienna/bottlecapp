@@ -206,25 +206,26 @@ def upload():
 @bottlecapp.route('/uploaded', methods=('GET', 'POST'))
 @flask_login.login_required
 def uploaded():
-	'''If uploaded cap file's extension is allowed, save to user folder.'''
-	if request.method == 'POST':
-		# Get the uploaded files as a list
-		uploaded_files = request.files.getlist('uploads')
-		filenames = []
-		for file in uploaded_files:
-			# Check if the file's extension is allowed
-			if file and Cap.allowed_ext(file.filename):
-				# Make the filename safe, remove unsupported chars
-				filename = werkzeug.secure_filename(file.filename)
-				# Save the file to the user folder
-				file.save(os.path.join(bottlecapp.config['UPLOAD_FOLDER'] + flask_login.current_user.username, filename))
-				# Save the filename into a list to be used later
-				filenames.append(filename)
-			else:
-				flash('Incorrect file type. Please upload only pngs.')
-				return redirect(url_for('upload'))
-		return redirect(url_for('gallery'))
-
+    '''If uploaded cap file's extension is allowed, save to user folder.'''
+    if request.method == 'POST':
+        # Get the uploaded files as a list
+        uploaded_files = request.files.getlist('uploads')
+        filenames = []
+        for file in uploaded_files:
+            # Check if the file's extension is allowed
+            if file and Cap.allowed_ext(file.filename):
+                # Make the filename safe, remove unsupported chars
+                filename = secure_filename(file.filename)
+                # Save the filename into a list to be used later
+                filenames.append(filename)
+                # Allow user to crop, rotate, and compress file
+                return render_template('upload.html')
+            else:
+                flash('Incorrect file type. Please upload only pngs.')
+                return redirect(url_for('upload'))
+        return redirect(url_for('upload'))
+# Save the file to the user folder
+# file.save(os.path.join(bottlecapp.config['UPLOAD_FOLDER'] + flask_login.current_user.username, filename))
 
 if __name__ == '__main__':
 	db.create_all()
