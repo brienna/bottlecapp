@@ -40,14 +40,21 @@ function preloadCaps() {
 
 /** Draw loaded caps onto the canvas */
 function drawCaps(caps) {
-  var x = 0;
-  var y = 0;
+  var margin = 20;  // space between window edges and grid
+  // Set first cap at top left corner of grid
+  var x = margin, y = margin;
+  var capWidth = 60;
+  var capHeight = capWidth; 
+  var gap = 3;  // space between caps
+
   for (var cap in caps) {
-    context.drawImage(caps[cap], x, y, 50, 50);
-    x += 53;
-    if (x >= width) {
-      y += 53;
-      x = 20;
+    context.drawImage(caps[cap], x, y, capWidth, capHeight);
+    // Update coordinates for next cap
+    x += capWidth + gap;
+    if (x + capWidth + gap + margin >= width) {  // otherwise cap cuts off mid-image
+      // Begin a new row
+      y += capHeight + gap;
+      x = margin;
     }
   }
 }
