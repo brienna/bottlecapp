@@ -1,7 +1,7 @@
 
 var canvas = document.querySelector('canvas');
 var context = canvas.getContext('2d');
-width = window.innerWidth/4;
+width = window.innerWidth;
 height = width;
 canvas.height = height;
 canvas.width = width;
@@ -35,12 +35,112 @@ function display(files) {
             // Create img element
             var image = new Image();
             image.addEventListener("load", function() {
-                // Draw image onto the canvas
-                context.drawImage(image, 0, 0, height, width);
+                imageLoaded(image);
             });
             image.src = blobURL;
         });
 
     }
 }
+
+function imageLoaded(img) {
+    drawImg();
+    function drawImg() {
+        context.scale(1.2, 1.2);
+        context.drawImage(img, 0, 0, height, width);
+    }
+}
+
+// Activate Hammer event listeners after DOM has loaded
+window.addEventListener('load', hammerIt);
+
+// from http://stackoverflow.com/questions/18011099/pinch-to-zoom-using-hammer-js
+function hammerIt() {
+    var posX = 0,
+    posY = 0,
+    scale = 1,
+    last_scale = 1,
+    last_posX = 0,
+    last_posY = 0,
+    max_pos_x = 0,
+    max_pos_y = 0,
+    transform = "",
+    el = canvas;
+
+    // Create Hammer instance
+    var hammertime = new Hammer(canvas);
+
+    // Turn on pinch gesture capability (off by default)
+    hammertime.get('pinch').set({ 
+        enable: true
+    });
+ 
+    // Listen for these gestures
+    hammertime.on('doubletap pan pinch panend pinchend', function(event) {
+        // Doubletap
+        if (event.type == "doubletap") {
+            transform =
+                "translate3d(0, 0, 0) " +
+                "scale3d(2, 2, 1) ";
+            scale = 2;
+            last_scale = 2;
+            try {
+                if (window.getComputedStyle(el, null).getPropertyValue('-webkit-transform').toString() != "matrix(1, 0, 0, 1, 0, 0)") {
+                    transform =
+                        "translate3d(0, 0, 0) " +
+                        "scale3d(1, 1, 1) ";
+                    scale = 1;
+                    last_scale = 1;
+                }
+            } catch (err) {}
+            el.style.webkitTransform = transform;
+            transform = "";
+        }
+
+        // Pan   
+        if (scale != 1) {
+            posX = last_posX + event.deltaX;
+            posY = last_posY + event.deltaY;
+            max_pos_x = Math.ceil((scale - 1) * el.clientWidth / 2);
+            max_pos_y = Math.ceil((scale - 1) * el.clientHeight / 2);
+            if (posX > max_pos_x) {
+                posX = max_pos_x;
+            }
+            if (posX < -max_pos_x) {
+                posX = -max_pos_x;
+            }
+            if (posY > max_pos_y) {
+                posY = max_pos_y;
+            }
+            if (posY < -max_pos_y) {
+                posY = -max_pos_y;
+            }
+        }
+
+        // Pinch
+        if (event.type == "pinch") {
+            scale = Math.max(.999, Math.min(last_scale * (event.scale), 4));
+        }
+        if(event.type == "pinchend"){last_scale = scale;}
+
+        // Panend
+        if(event.type == "panend"){
+        last_posX = posX < max_pos_x ? posX : max_pos_x;
+        last_posY = posY < max_pos_y ? posY : max_pos_y;
+        }
+
+        if (scale != 1) {
+            transform =
+                "translate3d(" + posX + "px," + posY + "px, 0) " +
+                "scale3d(" + scale + ", " + scale + ", 1)";
+        }
+
+        if (transform) {
+            el.style.webkitTransform = transform;
+        }
+
+    });
+}
+
+
 
