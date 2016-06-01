@@ -18,6 +18,7 @@ fileinput.onchange = function() {
     }
 }
 
+var image, scale;
 function display(files) {
     var reader = new FileReader();
 
@@ -33,9 +34,10 @@ function display(files) {
             var blobURL = window.URL.createObjectURL(blob);
 
             // Create img element
-            var image = new Image();
+            image = new Image();
             image.addEventListener("load", function() {
-                imageLoaded(image);
+                scale = 1
+                drawImg(scale);
             });
             image.src = blobURL;
         });
@@ -43,12 +45,11 @@ function display(files) {
     }
 }
 
-function imageLoaded(img) {
-    drawImg();
-    function drawImg() {
-        context.scale(1.2, 1.2);
-        context.drawImage(img, 0, 0, height, width);
-    }
+function drawImg(scale) {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.save();
+    context.drawImage(image, 0, 0, canvas.height * scale, canvas.width * scale);
+    context.restore();
 }
 
 // Activate Hammer event listeners after DOM has loaded
@@ -58,14 +59,13 @@ window.addEventListener('load', hammerIt);
 function hammerIt() {
     var posX = 0,
     posY = 0,
-    scale = 1,
     last_scale = 1,
     last_posX = 0,
     last_posY = 0,
     max_pos_x = 0,
     max_pos_y = 0,
     transform = "",
-    el = canvas;
+    el = canvas;  // element to listen to
 
     // Create Hammer instance
     var hammertime = new Hammer(canvas);
@@ -79,7 +79,19 @@ function hammerIt() {
     hammertime.on('doubletap pan pinch panend pinchend', function(event) {
         // Doubletap
         if (event.type == "doubletap") {
-            transform =
+            if (scale == 1) {
+                scale = 1.3;
+                last_scale = 1.3;
+                drawImg(scale);
+            } else {
+                scale = 1;
+                last_scale = 1;
+                drawImg(scale);
+            }
+        }
+
+
+            /*transform =
                 "translate3d(0, 0, 0) " +
                 "scale3d(2, 2, 1) ";
             scale = 2;
@@ -125,19 +137,21 @@ function hammerIt() {
 
         // Panend
         if(event.type == "panend"){
-        last_posX = posX < max_pos_x ? posX : max_pos_x;
-        last_posY = posY < max_pos_y ? posY : max_pos_y;
+            last_posX = posX < max_pos_x ? posX : max_pos_x;
+            last_posY = posY < max_pos_y ? posY : max_pos_y;
         }
 
+        // Zoom the image according to gesture
         if (scale != 1) {
             transform =
                 "translate3d(" + posX + "px," + posY + "px, 0) " +
                 "scale3d(" + scale + ", " + scale + ", 1)";
         }
 
+        // Pan the image according to gesture
         if (transform) {
             el.style.webkitTransform = transform;
-        }
+        }*/
 
     });
 }
