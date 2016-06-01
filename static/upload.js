@@ -18,7 +18,7 @@ fileinput.onchange = function() {
     }
 }
 
-var image, scale;
+var image, scale = 1.00;
 function display(files) {
     var reader = new FileReader();
 
@@ -36,7 +36,6 @@ function display(files) {
             // Create img element
             image = new Image();
             image.addEventListener("load", function() {
-                scale = 1
                 drawImg(scale);
             });
             image.src = blobURL;
@@ -47,13 +46,30 @@ function display(files) {
 
 function drawImg(scale) {
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.save();
     context.drawImage(image, 0, 0, canvas.height * scale, canvas.width * scale);
-    context.restore();
+    
 }
 
 // Activate Hammer event listeners after DOM has loaded
 window.addEventListener('load', hammerIt);
+
+var minScale=1.00;
+var maxScale=2.00;
+scaleIncrement=0.05;
+var doubletap = false;
+function animate() {
+    requestAnimationFrame(animate);
+    if (doubletap) {
+        drawImg(scale);
+        scale+=scaleIncrement;
+        if (scale<minScale || scale>maxScale){
+            doubletap = false;
+            scaleIncrement*=-1;
+            scale+=scaleIncrement;
+        }
+    }
+}
+
 
 // from http://stackoverflow.com/questions/18011099/pinch-to-zoom-using-hammer-js
 function hammerIt() {
@@ -74,19 +90,17 @@ function hammerIt() {
     hammertime.get('pinch').set({ 
         enable: true
     });
- 
+    
+    requestAnimationFrame(animate);
+    
     // Listen for these gestures
     hammertime.on('doubletap pan pinch panend pinchend', function(event) {
         // Doubletap
         if (event.type == "doubletap") {
-            if (scale == 1) {
-                scale = 1.3;
-                last_scale = 1.3;
-                drawImg(scale);
+            if (doubletap == false) {
+                doubletap = true;
             } else {
-                scale = 1;
-                last_scale = 1;
-                drawImg(scale);
+                doubletap = false; 
             }
         }
 
