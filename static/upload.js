@@ -50,8 +50,10 @@ var offsetx = 0; offsety = 0;
 function drawImg(scale) {
     // Erase canvas
     context.clearRect(0, 0, canvas.width, canvas.height);
+    context.save();
     // Draw image 
-    context.drawImage(image, originx + offsetx, originy + offsety, canvas.height * scale, canvas.width * scale);
+    context.drawImage(image, offsetx, offsety, canvas.height * scale, canvas.width * scale);
+    context.restore();
 }
 
 // Activate Hammer event listeners after DOM has loaded
@@ -64,9 +66,11 @@ var doubletap = false;
 var lastScale = scale;
 var scaleChange = 0;
 var tapx, tapy;
+var zoomDirection = "in";  // initial zoom direction
 function animate() {
     requestAnimationFrame(animate);
     if (doubletap) {
+        context.translate(originx, originy);
         drawImg(scale);
         scale+=zoomIntensity;
         scaleChange = scale - lastScale;
@@ -75,7 +79,7 @@ function animate() {
         if (scale<minScale || scale>maxScale){
             doubletap = false;
             zoomIntensity*=-1;
-            scale+=zoomIntensity;
+            scale+=zoomIntensity;  // to equal minScale or maxScale
             scaleChange = scale - lastScale;
         }
     }
@@ -84,16 +88,6 @@ function animate() {
 
 // from http://stackoverflow.com/questions/18011099/pinch-to-zoom-using-hammer-js
 function hammerIt() {
-    var posX = 0,
-    posY = 0,
-    last_scale = 1,
-    last_posX = 0,
-    last_posY = 0,
-    max_pos_x = 0,
-    max_pos_y = 0,
-    transform = "",
-    el = canvas;  // element to listen to
-
     // Create Hammer instance
     var hammertime = new Hammer(canvas);
 
@@ -108,55 +102,16 @@ function hammerIt() {
     hammertime.on('doubletap pan pinch panend pinchend', function(event) {
         // Doubletap
         if (event.type == "doubletap") {
-            tapx = event.center.x - canvas.offsetLeft;
-            tapy = event.center.y - canvas.offsetTop;
             doubletap = true;
-        }
-
-        /*// Pan
-        if (scale != 1) {
-            posX = last_posX + event.deltaX;
-            posY = last_posY + event.deltaY;
-            max_pos_x = Math.ceil((scale - 1) * el.clientWidth / 2);
-            max_pos_y = Math.ceil((scale - 1) * el.clientHeight / 2);
-            if (posX > max_pos_x) {
-                posX = max_pos_x;
-            }
-            if (posX < -max_pos_x) {
-                posX = -max_pos_x;
-            }
-            if (posY > max_pos_y) {
-                posY = max_pos_y;
-            }
-            if (posY < -max_pos_y) {
-                posY = -max_pos_y;
+            if (zoomDirection == "in") {
+                // Get coordinates of doubletap
+                tapx = event.center.x - canvas.offsetLeft;
+                tapy = event.center.y - canvas.offsetTop;
+                zoomDirection = "out";
+            } else {
+                zoomDirection = "in";
             }
         }
-
-        // Pinch
-        if (event.type == "pinch") {
-            scale = Math.max(.999, Math.min(last_scale * (event.scale), 4));
-        }
-        if(event.type == "pinchend"){last_scale = scale;}
-
-        // Panend
-        if(event.type == "panend"){
-            last_posX = posX < max_pos_x ? posX : max_pos_x;
-            last_posY = posY < max_pos_y ? posY : max_pos_y;
-        }
-
-        // Zoom the image according to gesture
-        if (scale != 1) {
-            transform =
-                "translate3d(" + posX + "px," + posY + "px, 0) " +
-                "scale3d(" + scale + ", " + scale + ", 1)";
-        }
-
-        // Pan the image according to gesture
-        if (transform) {
-            el.style.webkitTransform = transform;
-        }*/
-
     });
 }
 
