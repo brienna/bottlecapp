@@ -44,10 +44,14 @@ function display(files) {
     }
 }
 
+// Set initial origin at (0, 0)
+var originx = 0; originy = 0;  
+var offsetx = 0; offsety = 0; 
 function drawImg(scale) {
+    // Erase canvas
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(image, 0, 0, canvas.height * scale, canvas.width * scale);
-    
+    // Draw image 
+    context.drawImage(image, originx + offsetx, originy + offsety, canvas.height * scale, canvas.width * scale);
 }
 
 // Activate Hammer event listeners after DOM has loaded
@@ -55,17 +59,24 @@ window.addEventListener('load', hammerIt);
 
 var minScale=1.00;
 var maxScale=2.00;
-scaleIncrement=0.05;
+zoomIntensity=0.05;
 var doubletap = false;
+var lastScale = scale;
+var scaleChange = 0;
+var tapx, tapy;
 function animate() {
     requestAnimationFrame(animate);
     if (doubletap) {
         drawImg(scale);
-        scale+=scaleIncrement;
+        scale+=zoomIntensity;
+        scaleChange = scale - lastScale;
+        offsetx = -(tapx * scaleChange);
+        offsety = -(tapy * scaleChange);
         if (scale<minScale || scale>maxScale){
             doubletap = false;
-            scaleIncrement*=-1;
-            scale+=scaleIncrement;
+            zoomIntensity*=-1;
+            scale+=zoomIntensity;
+            scaleChange = scale - lastScale;
         }
     }
 }
@@ -97,33 +108,12 @@ function hammerIt() {
     hammertime.on('doubletap pan pinch panend pinchend', function(event) {
         // Doubletap
         if (event.type == "doubletap") {
-            if (doubletap == false) {
-                doubletap = true;
-            } else {
-                doubletap = false; 
-            }
+            tapx = event.center.x - canvas.offsetLeft;
+            tapy = event.center.y - canvas.offsetTop;
+            doubletap = true;
         }
 
-
-            /*transform =
-                "translate3d(0, 0, 0) " +
-                "scale3d(2, 2, 1) ";
-            scale = 2;
-            last_scale = 2;
-            try {
-                if (window.getComputedStyle(el, null).getPropertyValue('-webkit-transform').toString() != "matrix(1, 0, 0, 1, 0, 0)") {
-                    transform =
-                        "translate3d(0, 0, 0) " +
-                        "scale3d(1, 1, 1) ";
-                    scale = 1;
-                    last_scale = 1;
-                }
-            } catch (err) {}
-            el.style.webkitTransform = transform;
-            transform = "";
-        }
-
-        // Pan   
+        /*// Pan
         if (scale != 1) {
             posX = last_posX + event.deltaX;
             posY = last_posY + event.deltaY;
