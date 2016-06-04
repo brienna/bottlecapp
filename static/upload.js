@@ -1,10 +1,8 @@
 
 var canvas = document.querySelector('canvas');
 var context = canvas.getContext('2d');
-width = window.innerWidth;
-height = width;
-canvas.height = height;
-canvas.width = width;
+canvas.height = window.innerWidth;
+canvas.width = window.innerWidth;
 canvas.style.display = 'block';
 canvas.style.margin = "0 auto";
 
@@ -56,37 +54,47 @@ function drawImg(scale) {
     context.restore();
 }
 
-// Activate Hammer event listeners after DOM has loaded
-window.addEventListener('load', hammerIt);
-
-var minScale=1.00;
-var maxScale=2.00;
-zoomIntensity=0.05;
 var doubletap = false;
-var lastScale = scale;
-var scaleChange = 0;
-var tapx, tapy;
 var zoomDirection = "in";  // initial zoom direction
+var minScale=1.00;
+var maxScale=3.00;
+var zoomIntensity=0.05;
+var scaleChange = 0;
+var xGesture, yGesture;
+var info = [];
 function animate() {
     requestAnimationFrame(animate);
     if (doubletap) {
-        context.translate(originx, originy);
-        drawImg(scale);
-        scale+=zoomIntensity;
-        scaleChange = scale - lastScale;
-        offsetx = -(tapx * scaleChange);
-        offsety = -(tapy * scaleChange);
-        if (scale<minScale || scale>maxScale){
+        scale += zoomIntensity;
+        scaling();
+        if ((scale < minScale) || (scale > maxScale)) {
+            // End zoom
             doubletap = false;
-            zoomIntensity*=-1;
-            scale+=zoomIntensity;  // to equal minScale or maxScale
-            scaleChange = scale - lastScale;
+            // Reverse zoom direction for next doubletap
+            zoomIntensity *= -1;
+            if (zoomDirection == "in") {
+                scale = maxScale;
+                scaling();
+                zoomDirection = "out";
+            } else {
+                scale = minScale;
+                scaling();
+                zoomDirection = "in";
+            }
         }
     }
+
+    function scaling() {
+        scaleChange = scale - minScale;
+        offsetx = -(xGesture * scaleChange);
+        offsety = -(yGesture * scaleChange);
+        drawImg(scale);
+    } 
 }
 
+// Activate Hammer event listeners after DOM has loaded
+window.addEventListener('load', hammerIt);
 
-// from http://stackoverflow.com/questions/18011099/pinch-to-zoom-using-hammer-js
 function hammerIt() {
     // Create Hammer instance
     var hammertime = new Hammer(canvas);
@@ -97,7 +105,7 @@ function hammerIt() {
     });
     
     requestAnimationFrame(animate);
-    
+
     // Listen for these gestures
     hammertime.on('doubletap pan pinch panend pinchend', function(event) {
         // Doubletap
@@ -105,12 +113,9 @@ function hammerIt() {
             doubletap = true;
             if (zoomDirection == "in") {
                 // Get coordinates of doubletap
-                tapx = event.center.x - canvas.offsetLeft;
-                tapy = event.center.y - canvas.offsetTop;
-                zoomDirection = "out";
-            } else {
-                zoomDirection = "in";
-            }
+                xGesture = event.center.x - canvas.offsetLeft;
+                yGesture = event.center.y - canvas.offsetTop;
+            } 
         }
     });
 }
