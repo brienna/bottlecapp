@@ -16,7 +16,25 @@ fileinput.onchange = function() {
     }
 }
 
-var image, scale = 1.00;
+var image, scale = 1;
+// Set default transform values
+var a = 1;  // scale drawing horizontally
+var b = 0;  // skew drawing horizontally
+var c = 0;  // skew drawing vertically
+var d = 1;  // scale drawing vertically
+var e = 0;  // move drawing horizontally
+var f = 0;  // move drawing vertically
+function drawImg(a, b, c, d, e, f) {
+    // alert(a + "," + b + "," + c + "," + d + "," + e + "," + f);
+    // Erase canvas
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.save();
+    context.transform(a, b, c, d, e, f);
+    // Draw image
+    context.drawImage(image, 0, 0, canvas.height, canvas.width);
+    context.restore();
+}
+
 function display(files) {
     var reader = new FileReader();
 
@@ -34,7 +52,7 @@ function display(files) {
             // Create img element
             image = new Image();
             image.addEventListener("load", function() {
-                drawImg(scale);
+                drawImg(a, b, c, d, e, f);
             });
             image.src = blobURL;
         });
@@ -42,29 +60,19 @@ function display(files) {
     }
 }
 
-// Set initial origin at (0, 0)
-var originx = 0; originy = 0;  
-var offsetx = 0; offsety = 0; 
-function drawImg(scale) {
-    // Erase canvas
-    context.clearRect(0, 0, canvas.width, canvas.height);
-    context.save();
-    // Draw image 
-    context.drawImage(image, offsetx, offsety, canvas.height * scale, canvas.width * scale);
-    context.restore();
-}
-
+var info = [];
 var doubletap = false;
-var pinch = false;
-var zoomDirection = "in";  // initial zoom direction
+var pan = false;
+var zoomDirection = "in";  // set initial zoom direction
 var minScale=1.00;
 var maxScale=3.00;
 var zoomIntensity=0.1;
 var scaleChange = 0;
 var xGesture, yGesture;
-var info = [];
-var pinchScale = 1;
 var lastScale = 1;
+var xLastPos = 0, yLastPost = 0;
+var xMaxPos = 0, yMaxPos = 0;
+
 function animate() {
     requestAnimationFrame(animate);
     if (doubletap) {
@@ -86,17 +94,35 @@ function animate() {
             }
         }
     }
-    if (pinch) {
-        scaling();
-        pinch = false;
+
+    if (pan) {
+        xMaxPos = Math.ceil((scale - 1) * canvas.width / 2);
+        yMaxPos = Math.ceil((scale - 1) * canvas.height / 2);
+        if (xGesture > xMaxPos) {
+            xGesture = xMaxPos;
+        }
+        if (xGesture < -xMaxPos) {
+            xGesture = -xMaxPos;
+        }
+        if (yGesture > yMaxPos) {
+            yGesture = yMaxPos;
+        }
+        if (yGesture < -yMaxPos) {
+            yGesture = -yMaxPos;
+        }
+        pan = false;
     }
 
-    function scaling() {
-        scaleChange = scale - minScale;
-        offsetx = -(xGesture * scaleChange);
-        offsety = -(yGesture * scaleChange);
-        drawImg(scale);
+    if (scale != 1) {
+        scaling();
     }
+}
+
+function scaling() {
+    scaleChange = scale - minScale;
+    e = -(xGesture * scaleChange);
+    f = -(yGesture * scaleChange);
+    drawImg(scale, b, c, scale, e, f);
 }
 
 // Activate Hammer event listeners after DOM has loaded
@@ -118,6 +144,11 @@ function hammerIt() {
         // Doubletap
         if (event.type == "doubletap") {
             doubletap = true;
+        }
+
+        // Doubletap
+        if (event.type == "doubletap") {
+            doubletap = true;
             if (zoomDirection == "in") {
                 // Get coordinates of doubletap
                 xGesture = event.center.x - canvas.offsetLeft;
@@ -125,13 +156,23 @@ function hammerIt() {
             } 
         }
         if (event.type == "pinch") {
-            pinch = true;
             scale = Math.max(.999, Math.min(lastScale * (event.scale), 4));
             xGesture = event.center.x - canvas.offsetLeft;
             yGesture = event.center.y - canvas.offsetTop;
         }
         if (event.type == "pinchend") {
             lastScale = scale;
+        }
+
+        if (event.type == "panend") {
+            xLastPos = xGesture < xMaxPos ? xGesture : xmaxPos;
+            yLastPos = yGesture < yMaxPos ? yGesture : yMaxPos;
+        }
+
+        if (event.type == "pan") {
+            xGesture = xLastPos + event.deltaX;
+            yGesture = yLastPos + event.deltaY;
+            pan = true;
         }
     });
 }
