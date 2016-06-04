@@ -55,13 +55,16 @@ function drawImg(scale) {
 }
 
 var doubletap = false;
+var pinch = false;
 var zoomDirection = "in";  // initial zoom direction
 var minScale=1.00;
 var maxScale=3.00;
-var zoomIntensity=0.05;
+var zoomIntensity=0.1;
 var scaleChange = 0;
 var xGesture, yGesture;
 var info = [];
+var pinchScale = 1;
+var lastScale = 1;
 function animate() {
     requestAnimationFrame(animate);
     if (doubletap) {
@@ -83,13 +86,17 @@ function animate() {
             }
         }
     }
+    if (pinch) {
+        scaling();
+        pinch = false;
+    }
 
     function scaling() {
         scaleChange = scale - minScale;
         offsetx = -(xGesture * scaleChange);
         offsety = -(yGesture * scaleChange);
         drawImg(scale);
-    } 
+    }
 }
 
 // Activate Hammer event listeners after DOM has loaded
@@ -107,7 +114,7 @@ function hammerIt() {
     requestAnimationFrame(animate);
 
     // Listen for these gestures
-    hammertime.on('doubletap pan pinch panend pinchend', function(event) {
+    hammertime.on('doubletap pinch pinchend pan panend', function(event) {
         // Doubletap
         if (event.type == "doubletap") {
             doubletap = true;
@@ -117,8 +124,18 @@ function hammerIt() {
                 yGesture = event.center.y - canvas.offsetTop;
             } 
         }
+        if (event.type == "pinch") {
+            pinch = true;
+            scale = Math.max(.999, Math.min(lastScale * (event.scale), 4));
+            xGesture = event.center.x - canvas.offsetLeft;
+            yGesture = event.center.y - canvas.offsetTop;
+        }
+        if (event.type == "pinchend") {
+            lastScale = scale;
+        }
     });
 }
+
 
 
 
