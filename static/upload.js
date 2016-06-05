@@ -75,7 +75,7 @@ window.addEventListener('load', hammerIt);
 
 function hammerIt() {
     // Create Hammer Manager instance
-    var mc = new Hammer.Manager(canvas);
+    var mc = new Hammer.Manager(cropCanvas);
     var pinch = new Hammer.Pinch();
     var pan = new Hammer.Pan();
     pinch.recognizeWith(pan);
@@ -102,5 +102,28 @@ function hammerIt() {
 }
 
 
+/////// Second canvas!
+var cropCanvas = document.getElementById('crop');
+var ctx = cropCanvas.getContext('2d');
+cropCanvas.height = window.innerWidth;
+cropCanvas.width = window.innerWidth;
+cropCanvas.style.display = 'block';
+cropCanvas.style.margin = "0 auto";
 
+// Draw the crop circle
+var dots=60;
+var interval=(Math.PI*2)/dots;   
+var centerX=150;
+var centerY=150;
+var radius=100;
+ctx.fillStyle = 'white';
+for(var i=0;i< dots;i++){
+    desiredRadianAngleOnCircle = interval*i;
+    var x = centerX+radius*Math.cos(desiredRadianAngleOnCircle);
+    var y = centerY+radius*Math.sin(desiredRadianAngleOnCircle);
+     ctx.beginPath();
+     ctx.arc(x,y,3,0,Math.PI*2); 
+     ctx.closePath();
+     ctx.fill();   
+}
 

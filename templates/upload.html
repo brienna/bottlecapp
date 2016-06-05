@@ -15,7 +15,10 @@
 </form>
 
 <br>
-<canvas></canvas>
+<div id="canvases">
+    <canvas style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
+    <canvas id="crop" style="position: absolute; left: 0; top: 0; z-index: 2;"></canvas>
+</div>
 {% endblock content %}
 
 {% block script %}

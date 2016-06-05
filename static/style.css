@@ -1,9 +1,22 @@
 
+
+#canvases {
+    width: 100%;
+    display: block;
+    position: relative;
+}
+
+canvas {
+    overflow:hidden;
+}
+
 body {
 	background-color: #000;
 	color: #FFF;
 	height: 100%;
 	font-family: helvetica;
+    width: 100%;
+    margin: 0;
 }
 
 form {
