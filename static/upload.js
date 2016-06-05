@@ -28,11 +28,11 @@ function drawImg(a, b, c, d, e, f) {
     // alert(a + "," + b + "," + c + "," + d + "," + e + "," + f);
     // Erase canvas
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.save();
+    //context.save();
     context.transform(a, b, c, d, e, f);
     // Draw image
     context.drawImage(image, 0, 0, canvas.height, canvas.width);
-    context.restore();
+    //context.restore();
 }
 
 function display(files) {
@@ -60,121 +60,57 @@ function display(files) {
     }
 }
 
-var info = [];
-var doubletap = false;
-var pan = false;
-var zoomDirection = "in";  // set initial zoom direction
-var minScale=1.00;
-var maxScale=3.00;
-var zoomIntensity=0.1;
-var scaleChange = 0;
-var xGesture, yGesture;
-var lastScale = 1;
-var xLastPos = 0, yLastPost = 0;
-var xMaxPos = 0, yMaxPos = 0;
-
-function animate() {
-    requestAnimationFrame(animate);
-    if (doubletap) {
-        scale += zoomIntensity;
-        scaling();
-        if ((scale < minScale) || (scale > maxScale)) {
-            // End zoom
-            doubletap = false;
-            // Reverse zoom direction for next doubletap
-            zoomIntensity *= -1;
-            if (zoomDirection == "in") {
-                scale = maxScale;
-                scaling();
-                zoomDirection = "out";
-            } else {
-                scale = minScale;
-                scaling();
-                zoomDirection = "in";
-            }
-        }
-    }
-
-    if (pan) {
-        xMaxPos = Math.ceil((scale - 1) * canvas.width / 2);
-        yMaxPos = Math.ceil((scale - 1) * canvas.height / 2);
-        if (xGesture > xMaxPos) {
-            xGesture = xMaxPos;
-        }
-        if (xGesture < -xMaxPos) {
-            xGesture = -xMaxPos;
-        }
-        if (yGesture > yMaxPos) {
-            yGesture = yMaxPos;
-        }
-        if (yGesture < -yMaxPos) {
-            yGesture = -yMaxPos;
-        }
-        pan = false;
-    }
-
-    if (scale != 1) {
-        scaling();
-    }
+function scaling() {
+    scaleChange = scale;
+    offsetx = -(xGesture * scaleChange);
+    offsety = -(yGesture * scaleChange);
+    drawImg(scale, b, c, scale, offsetx, offsety);
 }
 
-function scaling() {
-    scaleChange = scale - minScale;
-    e = -(xGesture * scaleChange);
-    f = -(yGesture * scaleChange);
-    drawImg(scale, b, c, scale, e, f);
+var lastScale = 1;
+var lastDeltaX = 0;
+var lastDeltaY = 0;
+var currentScale = null;
+var currentDeltaX = null;
+var currentDeltaY = null;
+on = false;
+function animate() {
+    requestAnimationFrame(animate);
+    if (on) {
+        drawImg(currentScale, b, c, currentScale, currentDeltaX, currentDeltaY);
+        
+    }
 }
 
 // Activate Hammer event listeners after DOM has loaded
 window.addEventListener('load', hammerIt);
 
 function hammerIt() {
-    // Create Hammer instance
-    var hammertime = new Hammer(canvas);
-
-    // Turn on pinch gesture capability (off by default)
-    hammertime.get('pinch').set({ 
-        enable: true
-    });
+    // Create Hammer Manager instance
+    var mc = new Hammer.Manager(canvas);
+    var pinch = new Hammer.Pinch();
+    var pan = new Hammer.Pan();
+    pinch.recognizeWith(pan);
+    mc.add([pinch, pan]);
     
     requestAnimationFrame(animate);
-
-    // Listen for these gestures
-    hammertime.on('doubletap pinch pinchend pan panend', function(event) {
-        // Doubletap
-        if (event.type == "doubletap") {
-            doubletap = true;
-        }
-
-        // Doubletap
-        if (event.type == "doubletap") {
-            doubletap = true;
-            if (zoomDirection == "in") {
-                // Get coordinates of doubletap
-                xGesture = event.center.x - canvas.offsetLeft;
-                yGesture = event.center.y - canvas.offsetTop;
-            } 
-        }
-        if (event.type == "pinch") {
-            scale = Math.max(.999, Math.min(lastScale * (event.scale), 4));
-            xGesture = event.center.x - canvas.offsetLeft;
-            yGesture = event.center.y - canvas.offsetTop;
-        }
-        if (event.type == "pinchend") {
-            lastScale = scale;
-        }
-
-        if (event.type == "panend") {
-            xLastPos = xGesture < xMaxPos ? xGesture : xmaxPos;
-            yLastPos = yGesture < yMaxPos ? yGesture : yMaxPos;
-        }
-
-        if (event.type == "pan") {
-            xGesture = xLastPos + event.deltaX;
-            yGesture = yLastPos + event.deltaY;
-            pan = true;
-        }
+    
+    // Listen for pinch and pan events at the same time
+    mc.on("pinch pan", function (ev) {
+        on = true;
+        currentScale = lastScale * ev.scale;
+        currentDeltaX = lastDeltaX + (ev.deltaX / currentScale);
+        currentDeltaY = lastDeltaY + (ev.deltaY / currentScale);
     });
+
+    // Saving final transforms for adjustment next time the user interacts
+    mc.on("panend pinchend", function (ev) {
+        on = false;
+        lastScale = currentScale;
+        lastDeltaX = currentDeltaX;
+        lastDeltaY = currentDeltaY;
+    });
+    
 }
 
 
