@@ -7,13 +7,33 @@ canvas.style.display = 'block';
 canvas.style.margin = "0 auto";
 
 // Select and configure the file input
-var fileinput = document.getElementById('uploads');
+var fileinput = document.getElementById('upload');
 fileinput.onchange = function() {
     if (!(window.File && window.FileReader && window.FileList && window.Blob )) {
         console.log('The File APIs are not fully supported in this browser.');
     } else {
         display(fileinput.files);
     }
+}
+
+function display(files) {
+    var reader = new FileReader();
+    var file = files[0];  // the first file is the only file
+    // Read the file
+    reader.readAsArrayBuffer(file);
+    reader.addEventListener("load", function(event) {
+        // Create blob and get its URL
+        var blob = new Blob([event.target.result]);
+        window.URL = window.URL || window.webkitURL;
+        var blobURL = window.URL.createObjectURL(blob);
+
+        // Create img element
+        image = new Image();
+        image.addEventListener("load", function() {
+            drawImg(a, b, c, d, e, f);
+        });
+        image.src = blobURL;
+    });
 }
 
 var image, scale = 1;
@@ -28,43 +48,11 @@ function drawImg(a, b, c, d, e, f) {
     // alert(a + "," + b + "," + c + "," + d + "," + e + "," + f);
     // Erase canvas
     context.clearRect(0, 0, canvas.width, canvas.height);
-    //context.save();
+    context.save();
     context.transform(a, b, c, d, e, f);
     // Draw image
     context.drawImage(image, 0, 0, canvas.height, canvas.width);
-    //context.restore();
-}
-
-function display(files) {
-    var reader = new FileReader();
-
-    // Process one file at a time
-    for (var i = 0; i < files.length; i++) {
-        var file = files[i];
-        // Read the file
-        reader.readAsArrayBuffer(file);
-        reader.addEventListener("load", function(event) {
-            // Create blob and get its URL
-            var blob = new Blob([event.target.result]);
-            window.URL = window.URL || window.webkitURL;
-            var blobURL = window.URL.createObjectURL(blob);
-
-            // Create img element
-            image = new Image();
-            image.addEventListener("load", function() {
-                drawImg(a, b, c, d, e, f);
-            });
-            image.src = blobURL;
-        });
-
-    }
-}
-
-function scaling() {
-    scaleChange = scale;
-    offsetx = -(xGesture * scaleChange);
-    offsety = -(yGesture * scaleChange);
-    drawImg(scale, b, c, scale, offsetx, offsety);
+    context.restore();
 }
 
 var lastScale = 1;
