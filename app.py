@@ -113,7 +113,7 @@ def login():
         else:
             # New user, flash message
             flash('New user, please sign up')
-    return render_template('login.html', form=form, users=users, button='sign in')
+    return render_template('login.html', form=form, users=users, button='log in')
 
 
 @bottlecapp.route('/logout', methods=['GET'])
@@ -189,7 +189,7 @@ def signup():
             return redirect(url_for('login'))
         else:
             flash('Existing user. Please choose a different name or log in')
-    return render_template('login.html', form=form, users=users, button='sign up')
+    return render_template('login.html', form=form, users=users, button='register')
 
 
 class LoginForm(Form):

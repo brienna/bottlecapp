@@ -11,21 +11,16 @@ canvas {
 }
 
 body {
-	background-color: #000;
+	background-color: #282828;
 	color: #FFF;
 	height: 100%;
-	font-family: helvetica;
+	font-family: 'Alegreya Sans SC', sans-serif;
     width: 100%;
     margin: 0;
 }
 
-form {
-	margin: 0 auto;
-	width: 250px; /* a given width is required to be centered horizontally */ 
-	vertical-align: helvetica;
-}
-
-#wrapper {
+#email-login {
+    display:none;
 	position:absolute;
     top:50%;
     right: 0;
@@ -39,32 +34,86 @@ form > div {
 input[type=submit] {
 	display: block;
 	width: 100%;
-	height: 30px;
+	height: 25px;
 	margin-top: 10px;
-	padding: 5px 15px; 
+	padding: 12px 15px; 
     border: 0 none;
     cursor: pointer;
-    -webkit-border-radius: 5px;
-    border-radius: 5px;
-}
-
-input[type=submit]:hover {
-	background-color: black;
+    font-size: 17px;
+    font-family: 'Alegreya Sans SC', sans-serif;
 }
 
 input[type=text], input[type=password] {
-    padding:5px; 
+    display: block;
+    font-family: 'Helvetica', sans-serif;
+    width: 100%;
+    height: 15px;
+    padding:12px;
     margin-bottom: 10px;
-    border:2px solid #ccc; 
+    border: 0;
     -webkit-border-radius: 5px;
     border-radius: 5px;
+    font-size: 17px;
 }
 
-input[type=text]:hover, input[type=password]:hover {
-	background-color: black;
-}
+
 
 p {
 	display: float;
 }
+
+
+/* login.html */
+/* Facebook Login image */
+form {
+    margin: 0 auto;
+    margin-top: 20px;
+    width: 50%; /* a given width is required to be centered horizontally */
+    vertical-align: helvetica;
+}
+
+#social img {
+    width: 100px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+/* Divider */
+.loginDivider > span:before, .loginDivider > span:after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 999px;
+    height: 1px;
+    background: white;
+}
+
+.loginDivider > span:before {
+        right: 100%;
+        margin-right: 15px;
+    }
+
+.loginDivider > span:after {
+    left: 100%;
+    margin-left: 15px;
+}
+
+.loginDivider > span {
+        position: relative;
+        display: inline-block;
+}
+
+.loginDivider {
+    display: block;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap; 
+}
+
+
+
+
 

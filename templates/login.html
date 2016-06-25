@@ -1,12 +1,16 @@
-<!DOCTYPE html>
-<html>
+{% extends 'grid.html' %}
 
-<head>
-	<link type='text/css' rel='stylesheet' href='static/style.css'>
-</head>
+{% block head %}
+{{ super() }}
+{% include 'helpers/flash.html' %}
+{% endblock head %}
 
-<body>
+{% block content %}
 	{% include 'helpers/flash.html' %}
+	<a id="social" href='{{ url_for("facebook_login") }}'><img src="static/images/facebook.png"></a>
+
+	<div class="loginDivider"><span>OR</span></div>
+
 	<div id='wrapper'>
 	<form method='POST' action=''>
 		{% from "helpers/render_field.html" import render_field %}
@@ -18,13 +22,9 @@
 	    {{ render_field(form.password) }}
 
 	    <div><input type='submit' value='{{ button }}'>
-	    <a href='{{ url_for("signup") }}' id='signup'>SIGN UP</a></div>
-	    <a href='{{ url_for("facebook_login") }}'>Login with Facebook</a>
+	    <a href='{{ url_for("signup") }}' id='signup'>REGISTER</a></div>
 	</form>
 	</div>
 
-	<p>{{ users }}</p>
-	
-</body>
-
-</html>
+	<!--<p>{{ users }}</p>-->
+{% endblock content %}
