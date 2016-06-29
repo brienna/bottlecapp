@@ -14,9 +14,10 @@ body {
 	background-color: #282828;
 	color: #FFF;
 	height: 100%;
-	font-family: 'Alegreya Sans SC', sans-serif;
+	font-family: 'Source Sans Pro', sans-serif;
     width: 100%;
     margin: 0;
+    font-size: 12px;
 }
 
 #email-login {
@@ -34,29 +35,35 @@ form > div {
 input[type=submit] {
 	display: block;
 	width: 100%;
-	height: 25px;
-	margin-top: 10px;
+	height: 30px;
+	margin-top: 0px;
+    margin-bottom: 25px;
 	padding: 12px 15px; 
     border: 0 none;
     cursor: pointer;
     font-size: 17px;
-    font-family: 'Alegreya Sans SC', sans-serif;
+    font-family: 'Source Sans Pro', sans-serif;
 }
 
 input[type=text], input[type=password] {
     display: block;
-    font-family: 'Helvetica', sans-serif;
+    font-family: 'Source Sans Pro', sans-serif;
     width: 100%;
-    height: 15px;
+    height: 13px;
     padding:12px;
-    margin-bottom: 10px;
+    margin-bottom: 25px;
     border: 0;
     -webkit-border-radius: 5px;
     border-radius: 5px;
-    font-size: 17px;
+    font-size: 14px;
+    background-color: #7c7c7c;
+    color: white;
 }
 
-
+a {
+    display: block;
+    text-align: center;
+}
 
 p {
 	display: float;
@@ -94,7 +101,7 @@ form {
 .loginDivider > span:before {
         right: 100%;
         margin-right: 15px;
-    }
+}
 
 .loginDivider > span:after {
     left: 100%;
@@ -112,6 +119,36 @@ form {
     overflow: hidden;
     white-space: nowrap; 
 }
+
+/* Error spans */ 
+.error {
+    color: red;
+}
+
+/* Form labels */
+label {
+    top: 10px;
+    left: 10px;
+    opacity: 0.5;
+    position:absolute;
+    transition: transform .2s; /*all transitions with this label will occur at this speed*/
+}
+
+input.filled:valid + label,
+input.filled:focus + label {
+    transform: translate(0,-70%) translate(0,-20px);
+    font-weight: bold;
+    opacity: 0.5;
+}
+
+/* created to allow labels as placeholders */
+fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    position: relative; /* allows labels to be inside */
+}
+
 
 
 

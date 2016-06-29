@@ -2,11 +2,12 @@
 
 {% block head %}
 {{ super() }}
-{% include 'helpers/flash.html' %}
 {% endblock head %}
 
 {% block content %}
 	{% include 'helpers/flash.html' %}
+	<a href='{{ url_for("signup") }}' id='signup'>New here? Register</a></div>
+
 	<a id="social" href='{{ url_for("facebook_login") }}'><img src="static/images/facebook.png"></a>
 
 	<div class="loginDivider"><span>OR</span></div>
@@ -22,9 +23,33 @@
 	    {{ render_field(form.password) }}
 
 	    <div><input type='submit' value='{{ button }}'>
-	    <a href='{{ url_for("signup") }}' id='signup'>REGISTER</a></div>
+
+	    <a href="">Forgot password</a><br>
+	    
 	</form>
 	</div>
 
 	<!--<p>{{ users }}</p>-->
+
+<script>
+	/* Move placeholder label out of field when user begins typing */ 
+	snInput = document.getElementById('username');
+	snInput.addEventListener('input', function() {
+		if (snInput.value != "") {
+			snInput.classList.add('filled');
+		} else {
+			snInput.classList.remove("filled");
+		}
+	});
+
+	pwInput = document.getElementById('password');
+	pwInput.addEventListener('input', function() {
+		if (pwInput.value != "") {
+			pwInput.classList.add('filled');
+		} else {
+			pwInput.classList.remove("filled");
+		}
+	});
+</script>
 {% endblock content %}
+

@@ -196,11 +196,11 @@ class LoginForm(Form):
     '''A class definition for the login form object.
 
     Attributes:
-        username (object)
-        password (object)
+        username (object) - StringField(label text, validators)
+        password (object) - PasswordField(label text, validators)
     '''
-    username = StringField('username:', validators=[DataRequired()])
-    password = PasswordField('password:', validators=[DataRequired()])
+    username = StringField('Email address ', validators=[DataRequired()])
+    password = PasswordField('Password ', validators=[DataRequired()])
 
 
 class Cap(db.Model):
