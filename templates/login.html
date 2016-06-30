@@ -32,22 +32,19 @@
 	<!--<p>{{ users }}</p>-->
 
 <script>
-	/* Move placeholder label out of field when user begins typing */ 
-	snInput = document.getElementById('username');
-	snInput.addEventListener('input', function() {
-		if (snInput.value != "") {
-			snInput.classList.add('filled');
-		} else {
-			snInput.classList.remove("filled");
-		}
-	});
+	/* Animated placeholder labels: Every time an input changes,
+	look at its value. If it's not empty, the input element
+	gets assigned a "filled" class, which has been selected in CSS 
+	to place the label inside the input as a placeholder. If the 
+	value is empty, the input element loses its "filled" class. */ 
 
-	pwInput = document.getElementById('password');
-	pwInput.addEventListener('input', function() {
-		if (pwInput.value != "") {
-			pwInput.classList.add('filled');
+	var form = document.querySelector('form');
+	form.addEventListener('input', function(event) {
+		input = event.target;
+		if (input.value != '') {
+			input.classList.add('filled');
 		} else {
-			pwInput.classList.remove("filled");
+			input.classList.remove('filled');
 		}
 	});
 </script>
