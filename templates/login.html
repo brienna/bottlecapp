@@ -33,19 +33,31 @@
 
 <script>
 	/* Animated placeholder labels: Every time an input changes,
-	look at its value. If it's not empty, the input element
+	check its value. If it's not empty, the input element
 	gets assigned a "filled" class, which has been selected in CSS 
 	to place the label inside the input as a placeholder. If the 
 	value is empty, the input element loses its "filled" class. */ 
 
-	var form = document.querySelector('form');
-	form.addEventListener('input', function(event) {
-		input = event.target;
+	function checkInput(input) {
 		if (input.value != '') {
 			input.classList.add('filled');
 		} else {
 			input.classList.remove('filled');
 		}
+	}
+
+	var form = document.querySelector('form');
+	form.addEventListener('input', function(event) {
+		checkInput(event.target);
+	});
+
+	// Also check inputs' values immediately after page load
+	// to check for auto-fill
+	window.addEventListener('load', function() {
+		var snInput = document.getElementById('username');
+		checkInput(snInput);
+		var pwInput = document.getElementById('password');
+		checkInput(pwInput);
 	});
 </script>
 {% endblock content %}
