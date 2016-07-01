@@ -16,13 +16,51 @@
 
 <br>
 <div id="canvases">
-    <canvas style="position: absolute; left: 0; top: 0; z-index: 1;"></canvas>
-    <canvas id="crop" style="position: absolute; left: 0; top: 0; z-index: 2;"></canvas>
+    <canvas style="position: absolute; left: 0; top: 0; z-index: 1; width:100%; height: 100;"></canvas>
+    <!--<canvas id="crop" style="position: absolute; left: 0; top: 0; z-index: 2;"></canvas>-->
 </div>
 {% endblock content %}
 
 {% block script %}
-<script type="text/javascript" src="static/upload.js"></script>
-<script type="text/javascript" src="static/Hammer.js"></script>
+<script src="static/img-touch-canvas.js"></script>
+<script>
+    var canvas = document.querySelector('canvas');
+    canvas.height = window.innerWidth;
+    canvas.width = window.innerWidth;
+
+    // Select and configure the file input
+    var fileinput = document.getElementById('upload');
+    fileinput.onchange = function() {
+        if (!(window.File && window.FileReader && window.FileList && window.Blob )) {
+            console.log('The File APIs are not fully supported in this browser.');
+        } else {
+            display(fileinput.files);
+        }
+    }
+
+    function display(files) {
+        var reader = new FileReader();
+        var file = files[0];  // the first file is the only file
+        // Read the file
+        reader.readAsArrayBuffer(file);
+        reader.addEventListener("load", function(event) {
+            // Create blob and get its URL
+            var blob = new Blob([event.target.result]);
+            window.URL = window.URL || window.webkitURL;
+            var blobURL = window.URL.createObjectURL(blob);
+
+            // Create img element
+            image = new Image();
+            image.addEventListener("load", function() {
+                var gesturableImg = new ImgTouchCanvas({
+                    canvas: canvas,
+                    path: image.src,
+                    desktop: true
+                });
+            });
+            image.src = blobURL;
+        });
+    }
+</script>
 {% endblock script %}
 

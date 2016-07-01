@@ -6,15 +6,7 @@ canvas.width = window.innerWidth;
 canvas.style.display = 'block';
 canvas.style.margin = "0 auto";
 
-// Select and configure the file input
-var fileinput = document.getElementById('upload');
-fileinput.onchange = function() {
-    if (!(window.File && window.FileReader && window.FileList && window.Blob )) {
-        console.log('The File APIs are not fully supported in this browser.');
-    } else {
-        display(fileinput.files);
-    }
-}
+
 
 function display(files) {
     var reader = new FileReader();
