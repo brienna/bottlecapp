@@ -17,7 +17,8 @@
 <br>
 <div id="canvases">
     <canvas style="position: absolute; left: 0; top: 0; z-index: 1; width:100%; height: 100;"></canvas>
-    <!--<canvas id="crop" style="position: absolute; left: 0; top: 0; z-index: 2;"></canvas>-->
+    <!--pointer-events: none allows touch to pass through to element underneath-->
+    <canvas id="crop" style="position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none"></canvas>
 </div>
 {% endblock content %}
 
@@ -60,6 +61,31 @@
             });
             image.src = blobURL;
         });
+    }
+
+    /////// Second canvas!
+    var cropCanvas = document.getElementById('crop');
+    var ctx = cropCanvas.getContext('2d');
+    cropCanvas.height = window.innerWidth;
+    cropCanvas.width = window.innerWidth;
+    cropCanvas.style.display = 'block';
+    cropCanvas.style.margin = "0 auto";
+
+    // Draw the crop circle
+    var dots=60;
+    var interval=(Math.PI*2)/dots;   
+    var centerX=150;
+    var centerY=150;
+    var radius=100;
+    ctx.fillStyle = 'white';
+    for(var i=0;i< dots;i++){
+        desiredRadianAngleOnCircle = interval*i;
+        var x = centerX+radius*Math.cos(desiredRadianAngleOnCircle);
+        var y = centerY+radius*Math.sin(desiredRadianAngleOnCircle);
+         ctx.beginPath();
+         ctx.arc(x,y,3,0,Math.PI*2); 
+         ctx.closePath();
+         ctx.fill();   
     }
 </script>
 {% endblock script %}
